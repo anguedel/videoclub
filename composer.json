@@ -1,0 +1,13 @@
+{
+    "name": "dwes/angel",
+    "description": "Instalación de Composer",
+    "type": "project",
+    "require": {
+        "monolog/monolog": "^3.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dwes\\": "Videoclub 3.0/Videoclub/app/Dwes"
+        }
+    }
+}
