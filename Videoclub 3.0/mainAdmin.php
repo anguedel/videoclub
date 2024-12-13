@@ -1,88 +1,62 @@
 <?php
 include_once '../vendor/autoload.php';
 
-use Dwes\ProyectoVideoclub\Videoclub;
-
 session_start();
+
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION["usuario"])) {
+    echo "<p>No tienes permiso para ver esta información. Por favor, inicia sesión.</p>";
+    echo '<p><a href="index.php">Iniciar sesión</a></p>';
+    exit();
+}
+
 $nombre = $_SESSION["usuario"];
-$peliculas = $_SESSION["soportes"];
-$clientes = $_SESSION["socios"];
-$vc = $_SESSION["videoclub"];
-$cont = 1;
+$vc = $_SESSION["videoclub"] ?? null;
 
-if (isset($_SESSION['usuario'])) {
-    // Si el usuario es administrador
-    if ($_SESSION['usuario'] == "admin") {
-        echo "<h4>Bienvenido/a $nombre </h4> <br>";
+// Validar que el videoclub esté disponible en la sesión
+if (!$vc instanceof \Dwes\ProyectoVideoclub\Videoclub) {
+    die("Error: Videoclub no inicializado correctamente en la sesión.");
+}
 
-        echo '<form action="logout.php" method="POST">'; 
+// Bienvenida según el usuario
+if ($nombre === "admin") {
+    echo "<h4>Bienvenido/a $nombre</h4>";
 
-        echo "<h2>Listado de películas</h2>";
-        echo "<ul>";
+    // Listar películas
+    echo "<h2>Listado de películas</h2>";
+    echo "<ul>";
+    $vc->listarProductos();
+    echo "</ul>";
 
+    // Listar clientes
+    echo "<h2>Listado de clientes</h2>";
+    $vc->listarSocios();
 
-        /*
-        // Recorremos las películas para generar la lista de películas
-        foreach ($peliculas as $pelicula) {
-            echo " <h3>Soporte $cont </h3>";
-            foreach ($pelicula as $clave => $valor) {
-                echo "<li><strong>$clave </strong> -- $valor</li>";
-            }
-            echo "------------------------- <br>";
-            $cont++;
-        } */
+    echo '<br>';
 
-        $vc->listarProductos();
-        
+    // Botón de logout
+    echo '<form action="logout.php" method="POST">';
+    echo '<input type="submit" value="Salir de la sesión" name="enviar" />';
+    echo '</form><br>';
 
-        echo "<h2>Listado de clientes</h2>";
-        $vc = $_SESSION["videoclub"];
-        $vc->listarSocios();
-        echo "<br>";
+    // Formularios adicionales
+    echo '<form action="formCreateCliente.php" method="POST">';
+    echo '<input type="submit" value="Crear usuario" name="enviar" />';
+    echo '</form><br>';
 
-        echo '<input type="submit" value="Salir de la sesión" name="enviar"  />';
-        echo '</form> <br>';
+    echo '<form action="formUpdateCliente.php" method="POST">';
+    echo '<input type="submit" value="Modificar datos" name="enviar" />';
+    echo '</form><br>';
 
-
-    } 
-    
-    else {
-        echo "<p>No tienes permiso para ver esta información. Por favor, inicia sesión.</p>";
-        echo '<p><a href="index.php">Iniciar sesión</a></p>';
-    }
+    echo '<form action="removeCliente.php" method="POST">';
+    echo '<label for="usuario">Número de cliente:</label>';
+    echo '<input type="number" id="usuario" name="usuario" value="" required>';
+    echo '<input type="submit" value="Eliminar cliente" name="enviar" />';
+    echo '</form>';
 } else {
-    // Caso en el que no hay sesión iniciada
+    // Si el usuario no es administrador
     echo "<p>No tienes permiso para ver esta información. Por favor, inicia sesión.</p>";
     echo '<p><a href="index.php">Iniciar sesión</a></p>';
 }
-
-// Función para comprobar si un nombre existe en el array de clientes
-function esCliente($nombre, $clientes) {
-    foreach ($clientes as $cliente) {
-        if ($cliente['Nombre'] === $nombre) {
-            return true; // Nombre encontrado
-        }
-    }
-    return false; // Nombre no encontrado
-}
-
-echo '<form action="formCreateCliente.php" method="POST">'; 
-echo '<input type="submit" value="Crear usuario" name="enviar" />';
-echo '</form> <br>';
-
-echo '<form action="formUpdateCliente.php" method="POST">'; 
-echo '<input type="submit" value="Modificar datos" name="enviar" />';
-echo '</form';
-
-
-
-
-
-
-
-
-
-
-
 
 ?>
